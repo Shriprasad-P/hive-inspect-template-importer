@@ -1,0 +1,77 @@
+// Hive Inspect — Template importer schema
+// Default: SQLite (local/demo). For Supabase/Postgres, set DATABASE_URL to a
+// postgres connection string and change provider to "postgresql".
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Template {
+  id               String    @id @default(cuid())
+  name             String
+  source           String? // e.g. "spectora-html-text" | "seed" | "duplicate"
+  createdAt        DateTime  @default(now()) @map("created_at")
+  updatedAt        DateTime  @updatedAt @map("updated_at")
+  parentTemplateId String?   @map("parent_template_id")
+  parent           Template? @relation("TemplateDuplicates", fields: [parentTemplateId], references: [id])
+  children         Template[] @relation("TemplateDuplicates")
+  sections         Section[]
+  importReports    ImportReport[]
+
+  @@map("templates")
+}
+
+model Section {
+  id         String   @id @default(cuid())
+  templateId String   @map("template_id")
+  name       String
+  position   Int
+  sourceKey  String?  @map("source_key")
+  template   Template @relation(fields: [templateId], references: [id], onDelete: Cascade)
+  items      Item[]
+
+  @@index([templateId])
+  @@map("sections")
+}
+
+model Item {
+  id        String    @id @default(cuid())
+  sectionId String    @map("section_id")
+  name      String
+  position  Int
+  sourceKey String?   @map("source_key")
+  section   Section   @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+  comments  Comment[]
+
+  @@index([sectionId])
+  @@map("items")
+}
+
+model Comment {
+  id       String @id @default(cuid())
+  itemId   String @map("item_id")
+  bodyHtml String @map("body_html")
+  position Int
+  sourceKey String? @map("source_key")
+  item     Item   @relation(fields: [itemId], references: [id], onDelete: Cascade)
+
+  @@index([itemId])
+  @@map("comments")
+}
+
+model ImportReport {
+  id           String   @id @default(cuid())
+  templateId   String?  @map("template_id")
+  filename     String
+  createdAt    DateTime @default(now()) @map("created_at")
+  preservedJson String  @map("preserved_json") // JSON summary of what was kept
+  skippedJson  String   @map("skipped_json") // JSON array of skipped rows/reasons
+  template     Template? @relation(fields: [templateId], references: [id], onDelete: SetNull)
+
+  @@map("import_reports")
+}
