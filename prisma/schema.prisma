@@ -1,14 +1,15 @@
 // Hive Inspect — Template importer schema
-// Default: SQLite (local/demo). For Supabase/Postgres, set DATABASE_URL to a
-// postgres connection string and change provider to "postgresql".
+// Postgres (Supabase). Set DATABASE_URL to the pooled connection string.
+// DIRECT_URL is the direct (non-pooler) URL for migrations if needed.
 
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "sqlite"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 model Template {
