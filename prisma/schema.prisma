@@ -1,15 +1,14 @@
 // Hive Inspect — Template importer schema
-// Postgres (Supabase). Set DATABASE_URL to the pooled connection string.
-// DIRECT_URL is the direct (non-pooler) URL for migrations if needed.
+// Postgres (Supabase). Prefer the pooled connection string on Vercel:
+// postgresql://USER.REF:PASS@aws-0-REGION.pooler.supabase.com:6543/postgres?pgbouncer=true&sslmode=require
 
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider  = "postgresql"
-  url       = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL")
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 model Template {
