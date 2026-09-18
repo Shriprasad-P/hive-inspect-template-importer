@@ -2,6 +2,10 @@
 
 FDE take-home: import Spectora **Export to spreadsheet → Export HTML Text** files into an editable Template → Section → Item → Comment hierarchy, with duplicate support and a real backend.
 
+## Live demo
+
+https://hive-inspect-template-importer-delta.vercel.app
+
 ## Features
 
 - **Import** Spectora HTML Text / template `.xlsx` (official 28-column layout)
@@ -10,26 +14,26 @@ FDE take-home: import Spectora **Export to spreadsheet → Export HTML Text** fi
 - **Duplicate** a template; edits on the copy do not affect the original
 - **Import report** surfaces skipped rows/columns (metadata, blank rows, unused sheets)
 - **Failure handling** for empty files and missing sheets/columns
-- **Persistence**: Prisma + SQLite under `/data` by default (no Supabase secrets required for demo). Documented path to Supabase/Postgres.
+- **Persistence**: Prisma + **Postgres (Supabase)** in production; local demo can still use a Postgres `DATABASE_URL` (see `.env.example`).
 
 ## Stack
 
 - Next.js 14 (App Router) · TypeScript · Tailwind · shadcn-style UI
-- Prisma · SQLite (default) / Postgres (Supabase-compatible)
+- Prisma · Postgres (Supabase on Vercel)
 - SheetJS (`xlsx`) for spreadsheet parsing
 
 ## Quick start (local demo)
 
 ```bash
 npm install
-cp .env.example .env   # already defaults to SQLite in /data
-npm run db:migrate
-npm run sample:generate
-npm run db:seed
+cp .env.example .env   # set DATABASE_URL to Postgres (Supabase pooler)
+npm run db:push
+# optional synthetic seed:
+# npm run sample:generate && npm run db:seed
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000). A seeded **InterNACHI Residential (sample)** template should already be listed.
+Open [http://localhost:3000](http://localhost:3000) after setting `DATABASE_URL`. Prefer importing `samples/spectora-internachi-residential-html-text.xlsx` (real Spectora HTML Text export).
 
 ### Scripts
 
