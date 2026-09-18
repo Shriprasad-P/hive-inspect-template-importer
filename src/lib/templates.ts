@@ -94,61 +94,59 @@ export async function persistImport(
   preview: ParsePreview,
   filename: string
 ): Promise<{ templateId: string; reportId: string }> {
-  const result = await prisma.$transaction(async (tx) => {
-    const template = await tx.template.create({
-      data: {
-        name: preview.templateName,
-        source: "spectora-html-text",
-      },
-    });
-
-    for (let si = 0; si < preview.sections.length; si++) {
-      const sec = preview.sections[si];
-      const section = await tx.section.create({
-        data: {
-          templateId: template.id,
-          name: sec.name,
-          position: si,
-          sourceKey: sec.sourceKey ?? null,
-        },
-      });
-      for (let ii = 0; ii < sec.items.length; ii++) {
-        const item = sec.items[ii];
-        const createdItem = await tx.item.create({
-          data: {
-            sectionId: section.id,
-            name: item.name,
-            position: ii,
-            sourceKey: item.sourceKey ?? null,
-          },
-        });
-        for (let ci = 0; ci < item.comments.length; ci++) {
-          const c = item.comments[ci];
-          await tx.comment.create({
-            data: {
-              itemId: createdItem.id,
-              bodyHtml: c.bodyHtml,
-              position: ci,
-              sourceKey: c.sourceKey ?? null,
-            },
-          });
-        }
-      }
-    }
-
-    const report = await tx.importReport.create({
-      data: {
-        templateId: template.id,
-        filename,
-        preservedJson: JSON.stringify(preview.preserved),
-        skippedJson: JSON.stringify(preview.skipped),
-      },
-    });
-
-    return { templateId: template.id, reportId: report.id };
+  // Avoid interactive $transaction: Supabase transaction-mode pooler (6543)
+  // drops long interactive txs ("Transaction not found"). Sequential writes
+  // are fine for this take-home import size.
+  const template = await prisma.template.create({
+    data: {
+      name: preview.templateName,
+      source: "spectora-html-text",
+    },
   });
 
-  return result;
+  for (let si = 0; si < preview.sections.length; si++) {
+    const sec = preview.sections[si];
+    const section = await prisma.section.create({
+      data: {
+        templateId: template.id,
+        name: sec.name,
+        position: si,
+        sourceKey: sec.sourceKey ?? null,
+      },
+    });
+    for (let ii = 0; ii < sec.items.length; ii++) {
+      const item = sec.items[ii];
+      const createdItem = await prisma.item.create({
+        data: {
+          sectionId: section.id,
+          name: item.name,
+          position: ii,
+          sourceKey: item.sourceKey ?? null,
+        },
+      });
+      if (item.comments.length) {
+        await prisma.comment.createMany({
+          data: item.comments.map((c, ci) => ({
+            itemId: createdItem.id,
+            bodyHtml: c.bodyHtml,
+            position: ci,
+            sourceKey: c.sourceKey ?? null,
+          })),
+        });
+      }
+    }
+  }
+
+  const report = await prisma.importReport.create({
+    data: {
+      templateId: template.id,
+      filename,
+      preservedJson: JSON.stringify(preview.preserved),
+      skippedJson: JSON.stringify(preview.skipped),
+    },
+  });
+
+  return { templateId: template.id, reportId: report.id };
 }
 
 export async function duplicateTemplate(id: string): Promise<TemplateDetail> {
