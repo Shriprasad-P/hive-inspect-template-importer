@@ -2,7 +2,7 @@
 
 ## Time estimate
 
-Approximately **10–14 hours** wall-clock across scaffold, Spectora parsing, Postgres/Supabase, Vercel deploy, product exploration (Spectora + Hive), and docs. Focused coding time closer to **~8 hours**.
+Approximately **12–16 hours** wall-clock across scaffold, Spectora parsing, Postgres/Supabase, Vercel deploy, product exploration (Spectora + Hive), and docs. Focused coding time closer to **~9 hours**.
 
 ## Live deploy
 
@@ -28,15 +28,21 @@ Synthetic `samples/spectora-internachi-sample.xlsx` remains for offline demos (`
 
 ### Spectora (required)
 
-Signed up for a free trial, loaded **InterNACHI Residential** from Template Center, exported HTML Text, and used that file as the importer input. Export UX matches Spectora’s support article (three-dot menu → Export to spreadsheet → Export HTML Text).
+Signed up for a free trial, loaded **InterNACHI Residential** from Template Center (id `335823`), exported HTML Text, and committed that file. Export UX matches Spectora’s support article (⋯ → Export to spreadsheet → Export HTML Text). Download used a `.xls` name; bytes are OOXML `.xlsx`.
 
 ### Hive Inspect (required)
 
-Trial exploration notes (dashboard onboarding, sample inspection / publish, and Spectora template import path) are captured under **Hive product feedback** below as the trial walkthrough is completed. Hive docs describe importing Spectora templates as HTML and also offer Template Hub certified templates — that dual path informed the “preview preserved vs skipped” polish in this app.
+Free trial account (dashboard as company **Shultz**). Hands-on:
+
+1. **Templates → Upload → Import Template → Spectora** accepts `.xls`/`.xlsx` only. Uploaded the committed InterNACHI HTML Text file (~20s; “Downloading and uploading images…” overlay even with no photos).
+2. Import result: **13 sections / 69 subsections / 392 fields** — matches our importer’s preserved counts. `&amp;` normalized to `&`.
+3. Demo inspection (123 Sample Street) has a working **Web Editor** (not mobile-only): Preview opens a full client report; **Publish** dialog is clear (“visible to clients”). Did **not** publish, to preserve the 5 free reports.
+4. Attached the imported Spectora template to the demo order → **Generate Report** required (import ≠ ready report). Fresh InterNACHI client preview looked nearly empty until comments were selected — unchecked fields are hidden.
+5. New Inspection wizard: Confirm stays disabled until date/time; first paint showed “Availability not configured.”
 
 ### Binsr (optional)
 
-Not fully explored in this pass. Choice: prioritize Spectora fidelity + Hive’s own import docs over a third product, given the two-day hackathon budget. Happy to compare in the walkthrough if reviewers want that angle.
+Skipped for time. Prioritized Spectora fidelity + Hive’s own Spectora import path under the two-day budget.
 
 ## What was cut / deferred
 
@@ -67,13 +73,24 @@ Not fully explored in this pass. Choice: prioritize Spectora fidelity + Hive’s
 5. Failure cases: empty file; missing Section Name / Item Name headers.
 6. Import report on template detail lists skipped metadata.
 
-## Hive product feedback (draft for walkthrough)
+## Hive product feedback (for walkthrough)
 
-From Hive docs + switching guide (to be validated hands-on in trial):
+What works well:
+- Spectora is first in “Current Software” on signup, with copy that setup will help import — good switcher intent.
+- Spectora xlsx import lands the full InterNACHI hierarchy quickly; Web Editor + Preview are desktop-capable and polished.
+- Trial messaging is clear (5 reports, no card).
 
-- Spectora switch path expects **HTML** template export — same constraint this assignment uses; previewing drop/skip is high-leverage for switchers.
-- Template Hub + certified forms (TREC, NPMA-33, etc.) are strong; clarifying “what survived import” in-product would reduce support load for Spectora movers.
-- Docs are phone-first and clear; a single “switching checklist” that pairs contact import + template import + first published report would match the assignment’s required exploration path.
+Friction / opportunities:
+- **Import name = filename**, truncated in the editor; rename is a separate step. Default to Spectora template title when present.
+- One “Spectora” import choice with no HTML vs Plain Text label — switchers may upload the wrong export.
+- After import, editor showed **unsaved changes** with no edits made (noise).
+- **Attach template ≠ generated report** — needs an extra Generate Report; easy to miss (“Template – Not Generated”).
+- Client preview **hides unchecked comments**, so a freshly generated InterNACHI template looks empty despite 392 imported fields. A post-import “select defaults / expand all” would help trust.
+- Signup verification URL stays on `/signup?step=2`; refresh loses the pending-verify state and drops you on generic login.
+- Terms checkbox / CTA can sit below the fold on step 2; disabled CTA still looks fully blue.
+- New Inspection: availability must be configured before Confirm enables — first-run friction for trial users.
+
+How this informed our take-home: we invested in **import preview (preserved vs skipped)** so switchers see survival before commit — the same trust gap Hive’s blank post-import preview exposes.
 
 ## Credits / references
 
